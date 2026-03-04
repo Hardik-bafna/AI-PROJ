@@ -46,11 +46,11 @@ export default function Home() {
             <h2 className="text-xl font-semibold">{data.city}</h2>
 
             <p className="mt-2 text-lg">
-              AQI: <span className="font-bold">{data.aqi}</span>
+              AQI: <span className="font-bold">{data.AQI}</span>
             </p>
 
             <p className="text-zinc-400">
-              {data.status}
+              {data.Status}
             </p>
 
           </div>
