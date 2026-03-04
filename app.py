@@ -1,7 +1,6 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import requests
-
 from agent import reflex_agent
 
 import os
@@ -11,41 +10,55 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
+# Replace with your OpenWeather API key
+API_KEY = os.environ['API_KEY']
+
+
 @app.route("/")
 def home():
     return "AQI Reflex Agent API Running"
 
+
 @app.route("/aqi")
 def get_aqi():
 
-    API_KEY = os.environ['API_KEY']
+    city = request.args.get("city")
 
-    lat = 17.3850
-    lon = 78.4867
+    if not city:
+        return jsonify({"error": "Please provide a city name"})
 
-    url = f"https://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={API_KEY}"
+    try:
+        # Step 1: Get coordinates for the city
+        geo_url = f"http://api.openweathermap.org/geo/1.0/direct?q={city}&limit=1&appid={API_KEY}"
+        geo_response = requests.get(geo_url)
+        geo_data = geo_response.json()
 
-    response = requests.get(url)
-    data = response.json()
+        if len(geo_data) == 0:
+            return jsonify({"error": "City not found"})
 
-    # Debug print to terminal
-    print(data)
+        lat = geo_data[0]["lat"]
+        lon = geo_data[0]["lon"]
 
-    if "list" not in data:
+        # Step 2: Get air pollution data
+        pollution_url = f"https://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={API_KEY}"
+        pollution_response = requests.get(pollution_url)
+        pollution_data = pollution_response.json()
+
+        pm25 = pollution_data["list"][0]["components"]["pm2_5"]
+
+        # Step 3: Calculate AQI using reflex agent
+        aqi, status = reflex_agent(pm25)
+
         return jsonify({
-            "error": "API response invalid",
-            "response": data
+            "City": city,
+            "PM25": pm25,
+            "AQI": aqi,
+            "Status": status
         })
 
-    pm25 = data["list"][0]["components"]["pm2_5"]
+    except Exception as e:
+        return jsonify({"error": str(e)})
 
-    aqi, status = reflex_agent(pm25)
-
-    return jsonify({
-        "PM25": pm25,
-        "AQI": aqi,
-        "Status": status
-    })
 
 if __name__ == "__main__":
     app.run(debug=True)
