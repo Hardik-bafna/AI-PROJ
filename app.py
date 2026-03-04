@@ -4,6 +4,10 @@ import requests
 
 from agent import reflex_agent
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 app = Flask(__name__)
 CORS(app)
 
@@ -14,7 +18,7 @@ def home():
 @app.route("/aqi")
 def get_aqi():
 
-    API_KEY = "a8bc7fcc0d461539d83668ce9d7389ed"
+    API_KEY = os.environ['API_KEY']
 
     lat = 17.3850
     lon = 78.4867
