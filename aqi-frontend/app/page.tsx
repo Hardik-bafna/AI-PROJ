@@ -8,7 +8,7 @@ export default function Home() {
 
   useEffect(() => {
 
-    fetch("http://127.0.0.1:5000/aqi")
+    fetch("http://127.0.0.1:5000/aqi?city=${city}")
       .then(res => res.json())
       .then(data => setAqiData(data))
 
