@@ -1,68 +1,62 @@
-# Air Quality Index (AQI) Reflex Agent
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+import requests
+from agent import reflex_agent
 
-This project is a full-stack application that provides real-world Air Quality Index (AQI) data for any city. It utilizes a **Reflex Agent** logic in the backend to calculate the AQI based on various pollutant concentrations fetched from the OpenWeatherMap API.
+app = Flask(__name__)
+CORS(app)
 
-## Project Structure
 
-* **Backend**: A Flask-based Python server that handles API requests, fetches environmental data, and calculates AQI.
-* **Frontend**: A modern, responsive web interface built with Next.js and Tailwind CSS.
+API_KEY = "a8bc7fcc0d461539d83668ce9d7389ed"
 
-## Key Features
 
-* **Real-time Data**: Fetches current pollutant levels including PM2.5, PM10, $NO_2$, $O_3$, and $CO$.
-* **Reflex Agent Logic**: Uses a rule-based agent to determine the final AQI category (e.g., Good, Satisfactory, Moderate, Poor, Severe) based on the highest sub-index of all pollutants.
-* **Geolocation Integration**: Converts city names into geographical coordinates (Latitude/Longitude) to ensure accurate weather data retrieval.
-* **Modern UI**: A dark-themed, minimalist dashboard for quick air quality checks.
+@app.route("/")
+def home():
+    return "AQI Reflex Agent API Running"
 
-## Technologies Used
 
-### Backend
-* **Python**: Core programming language.
-* **Flask**: Web framework for the API.
-* **Requests**: For making external API calls to OpenWeatherMap.
-* **Flask-CORS**: To enable cross-origin requests from the frontend.
+@app.route("/aqi")
+def get_aqi():
 
-### Frontend
-* **Next.js (v16.1.6)**: React framework for the user interface.
-* **React (v19.2.3)**: For component-based UI development.
-* **Tailwind CSS**: For styling and responsive design.
-* **TypeScript**: For type-safe frontend development.
+    city = request.args.get("city")
 
-## Getting Started
+    if not city:
+        return jsonify({"error": "Please provide a city name"})
 
-### Backend Setup
-1.  Navigate to the `backend/` directory.
-2.  Install required dependencies:
-    ```bash
-    pip install flask flask-cors requests python-dotenv
-    ```
-3.  Create a .env file `backend/.env` with the following format:
-    ```
-    APP_KEY="YOUR KEY HERE"
-    ```
-4.  Run the Flask server:
-    ```bash
-    python app.py
-    ```
-    The server will start at `http://127.0.0.1:5000`.
+    try:
+     
+        geo_url = f"http://api.openweathermap.org/geo/1.0/direct?q={city}&limit=1&appid={API_KEY}"
+        geo_data = requests.get(geo_url).json()
 
-### Frontend Setup
-1.  Navigate to the `aqi-frontend/` directory.
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
-3.  Run the development server:
-    ```bash
-    npm run dev
-    ```
-4.  Open [http://localhost:3000](http://localhost:3000) in your browser.
+        if len(geo_data) == 0:
+            return jsonify({"error": "City not found"})
 
-## How It Works
+        lat = geo_data[0]["lat"]
+        lon = geo_data[0]["lon"]
 
-1.  **Input**: The user enters a city name in the frontend.
-2.  **Geolocation**: The backend uses the OpenWeatherMap Geo API to find the coordinates of the city.
-3.  **Pollution Data**: The backend fetches raw pollutant concentrations for those coordinates.
-4.  **AQI Calculation**: The `reflex_agent` in `agent.py` calculates sub-indices for each pollutant and identifies the "final AQI" as the maximum value among them.
-5.  **Status Assignment**: The agent maps the final AQI to a qualitative status (e.g., "Moderate" or "Severe").
-6.  **Display**: The results are returned as a JSON object and displayed on the dashboard.
+       
+        pollution_url = f"https://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={API_KEY}"
+        pollution_data = requests.get(pollution_url).json()
+
+        components = pollution_data["list"][0]["components"]
+
+        
+        aqi, status = reflex_agent(components)
+
+        return jsonify({
+            "City": city,
+            "PM25": components["pm2_5"],
+            "PM10": components["pm10"],
+            "NO2": components["no2"],
+            "O3": components["o3"],
+            "CO": components["co"],
+            "AQI": aqi,
+            "Status": status
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
