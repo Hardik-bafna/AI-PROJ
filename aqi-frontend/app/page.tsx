@@ -9,7 +9,7 @@ export default function Home() {
 
   const getAQI = async () => {
 
-    const res = await fetch(`http://localhost:5000/aqi?city=${city}`)
+    const res = await fetch(`http://127.0.0.1:5000/aqi?city=${city}`)
     const result = await res.json()
 
     setData(result)
