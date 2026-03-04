@@ -36,7 +36,10 @@ This project is a full-stack application that provides real-world Air Quality In
     ```bash
     pip install flask flask-cors requests python-dotenv
     ```
-3.  Create a .env file `backend/.env` 
+3.  Create a .env file `backend/.env` with the following format:
+   ```
+   APP_KEY="YOUR KEY HERE"
+   ```
 4.  Run the Flask server:
     ```bash
     python app.py
