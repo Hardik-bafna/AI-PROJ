@@ -6,7 +6,7 @@ from agent import reflex_agent
 app = Flask(__name__)
 CORS(app)
 
-# Replace with your OpenWeather API key
+
 API_KEY = "a8bc7fcc0d461539d83668ce9d7389ed"
 
 
@@ -24,10 +24,9 @@ def get_aqi():
         return jsonify({"error": "Please provide a city name"})
 
     try:
-        # Step 1: Get coordinates for the city
+     
         geo_url = f"http://api.openweathermap.org/geo/1.0/direct?q={city}&limit=1&appid={API_KEY}"
-        geo_response = requests.get(geo_url)
-        geo_data = geo_response.json()
+        geo_data = requests.get(geo_url).json()
 
         if len(geo_data) == 0:
             return jsonify({"error": "City not found"})
@@ -35,19 +34,22 @@ def get_aqi():
         lat = geo_data[0]["lat"]
         lon = geo_data[0]["lon"]
 
-        # Step 2: Get air pollution data
+       
         pollution_url = f"https://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={API_KEY}"
-        pollution_response = requests.get(pollution_url)
-        pollution_data = pollution_response.json()
+        pollution_data = requests.get(pollution_url).json()
 
-        pm25 = pollution_data["list"][0]["components"]["pm2_5"]
+        components = pollution_data["list"][0]["components"]
 
-        # Step 3: Calculate AQI using reflex agent
-        aqi, status = reflex_agent(pm25)
+        
+        aqi, status = reflex_agent(components)
 
         return jsonify({
             "City": city,
-            "PM25": pm25,
+            "PM25": components["pm2_5"],
+            "PM10": components["pm10"],
+            "NO2": components["no2"],
+            "O3": components["o3"],
+            "CO": components["co"],
             "AQI": aqi,
             "Status": status
         })
