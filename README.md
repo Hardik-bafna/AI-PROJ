@@ -34,9 +34,10 @@ This project is a full-stack application that provides real-world Air Quality In
 1.  Navigate to the `backend/` directory.
 2.  Install required dependencies:
     ```bash
-    pip install flask flask-cors requests
+    pip install flask flask-cors requests python-dotenv
     ```
-3.  Run the Flask server:
+3.  Create a .env file `backend/.env` 
+4.  Run the Flask server:
     ```bash
     python app.py
     ```
