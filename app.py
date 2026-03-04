@@ -3,11 +3,15 @@ from flask_cors import CORS
 import requests
 from agent import reflex_agent
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 app = Flask(__name__)
 CORS(app)
 
 # Replace with your OpenWeather API key
-API_KEY = "a8bc7fcc0d461539d83668ce9d7389ed"
+API_KEY = os.environ['API_KEY']
 
 
 @app.route("/")
