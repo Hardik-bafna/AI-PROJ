@@ -6,8 +6,11 @@ from agent import reflex_agent
 app = Flask(__name__)
 CORS(app)
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
-API_KEY = "a8bc7fcc0d461539d83668ce9d7389ed"
+API_KEY = os.environ["APP_KEY"]
 
 
 @app.route("/")
