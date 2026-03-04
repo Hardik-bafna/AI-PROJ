@@ -1,43 +1,76 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export default function Home() {
 
-  const [city, setCity] = useState("")
-  const [data, setData] = useState<any>(null)
+  const [aqiData, setAqiData] = useState<any>(null)
 
-  const getAQI = async () => {
+  useEffect(() => {
 
-    const res = await fetch(`http://localhost:5000/aqi?city=${city}`)
-    const result = await res.json()
+    fetch("http://127.0.0.1:5000/aqi")
+      .then(res => res.json())
+      .then(data => setAqiData(data))
 
-    setData(result)
+  }, [])
+
+
+  function getColor(status:string){
+
+    switch(status){
+      case "Good": return "text-green-600"
+      case "Satisfactory": return "text-yellow-500"
+      case "Moderate": return "text-orange-500"
+      case "Poor": return "text-red-500"
+      case "Very Poor": return "text-purple-600"
+      case "Severe": return "text-red-800"
+      default: return "text-gray-500"
+    }
+
   }
 
-  return (
-    <main style={{padding:"40px", fontFamily:"sans-serif"}}>
 
-      <h1>AQI Checker</h1>
+  if(!aqiData){
+    return(
+      <div className="flex items-center justify-center h-screen text-2xl">
+        Loading AQI Data...
+      </div>
+    )
+  }
 
-      <input
-        placeholder="Enter city"
-        value={city}
-        onChange={(e)=>setCity(e.target.value)}
-      />
+  return(
 
-      <button onClick={getAQI}>
-        Check AQI
-      </button>
+    <div className="h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-700">
 
-      {data && (
-        <div style={{marginTop:"20px"}}>
-          <h2>{data.city}</h2>
-          <p>AQI: {data.aqi}</p>
-          <p>Status: {data.status}</p>
+      <div className="bg-white shadow-2xl rounded-2xl p-10 w-[420px] text-center">
+
+        <h1 className="text-3xl font-bold mb-6">
+          🌍 Air Quality Monitor
+        </h1>
+
+        <div className="text-lg">
+          PM2.5
         </div>
-      )}
 
-    </main>
+        <div className="text-4xl font-bold mb-5">
+          {aqiData.PM25}
+        </div>
+
+        <div className="text-lg">
+          AQI
+        </div>
+
+        <div className="text-5xl font-bold mb-5">
+          {aqiData.AQI}
+        </div>
+
+        <div className={`text-2xl font-bold ${getColor(aqiData.Status)}`}>
+          {aqiData.Status}
+        </div>
+
+      </div>
+
+    </div>
+
   )
 }
