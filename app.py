@@ -25,7 +25,7 @@ def get_aqi():
     pm25 = latest["PM25"]
 
     # Run reflex agent
-    aqi, status = reflex_agent(pm25)
+    aqi, status = reflex_agent(pm25) 
 
     return jsonify({
         "PM25": pm25,
