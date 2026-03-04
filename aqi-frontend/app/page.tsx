@@ -33,8 +33,8 @@ export default function Home() {
       {data && (
         <div style={{marginTop:"20px"}}>
           <h2>{data.city}</h2>
-          <p>AQI: {data.aqi}</p>
-          <p>Status: {data.status}</p>
+          <p>AQI: {data.AQI}</p>
+          <p>Status: {data.Status}</p>
         </div>
       )}
 
