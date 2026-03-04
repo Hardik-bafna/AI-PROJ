@@ -1,0 +1,19 @@
+body{
+font-family: Arial;
+text-align:center;
+background:#f4f4f4;
+}
+
+.card{
+width:300px;
+margin:auto;
+padding:30px;
+background:white;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.2);
+}
+
+#aqi{
+font-size:60px;
+color:#ff5722;
+}
